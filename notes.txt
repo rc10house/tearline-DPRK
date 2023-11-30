@@ -1,0 +1,2 @@
+- Need a generator function to set up the training data
+ 
