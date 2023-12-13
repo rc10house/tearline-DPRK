@@ -25,7 +25,7 @@ class Cowc(data.Dataset):
 
         # load labels 
         if label_file is None:
-            label_file = os.path.join(self.root_folder, "toronto_test_label.txt")
+            label_file = os.path.join(self.root_folder, "toronto_"+split+"_label.txt")
         if not os.path.exists(label_file):
             raise ValueError(
                 "Label file {:s} does not exist!".format(label_file))
