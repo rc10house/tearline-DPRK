@@ -5,7 +5,7 @@ import torch.nn as nn
 import torch.optim as optim 
 import torchvision.transforms as transforms
 from tearline_data_loader import Cowc
-from student_code import LeNet, train_model, test_model
+from lenet import LeNet, train_model, test_model
 
 def save_checkpoint(state, is_best, file_folder="./outputs/",
                     filename="checkpoint.pth.tar"):
@@ -49,11 +49,11 @@ def main(args):
     ################################
     # setup dataset and dataloader #
     ################################
-    train_set = Cowc(root="", split="train", transform=train_transforms)
-    test_set = Cowc(root="", split="val", transform=test_transform)
+    train_set = Cowc(root="./", split="train", transform=train_transforms)
+    test_set = Cowc(root="./", split="test", transform=test_transform)
 
     train_loader = torch.utils.data.DataLoader(
-        train_set, batch_size=args.batch_size, shuffle=True)
+        train_set, batch_size=args.batch_size, shuffle=False)
     test_loader = torch.utils.data.DataLoader(
         test_set, batch_size=args.batch_size, shuffle=False)
 
@@ -75,15 +75,15 @@ def main(args):
             # load optimizer states
             optimizer.load_state_dict(checkpoint['optimizer'])
             print("=> loaded checkpoint '{:s}' (epoch {:d}, acc {:0.2f})".format(args.resume, start_epoch, 100*best_acc))
-    else:
-        print("=> no checkpoint found at '{}'".format(args.resume))
-        return 
+        else:
+            print("=> no checkpoint found at '{}'".format(args.resume))
+            return 
     
     # train 
     print("Training the model...\n")
     for epoch in range(start_epoch, args.epochs):
             # train model for 1 epoch 
-            train_model(model, train_loader, optimizer, training_criterion, epoch)
+        train_model(model, train_loader, optimizer, training_criterion, epoch)
         # evaluate the model on test_set after this epoch
         acc = test_model(model, test_loader, epoch)
         # save the current checkpoint 
@@ -101,6 +101,6 @@ if __name__=="__main__":
     parser.add_argument("--epochs", default=10, type=int, metavar="N", help="number of total epochs to run")
     parser.add_argument("--lr", default=0.001, type=float, metavar="LR", help="initial learning rate", dest="lr")
     parser.add_argument("--batch_size", default=32, type=int, metavar="N", help="number of images within a mini-batch")
-    parser.add_argument("--resume", default="", type=str, metavar="PATH", help="path to latest checkpoint (default: none)")
+    parser.add_argument("--resume", default='', type=str, metavar="PATH", help="path to latest checkpoint (default: none)")
     args = parser.parse_args()
     main(args)

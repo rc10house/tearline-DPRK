@@ -18,7 +18,7 @@ class Cowc(data.Dataset):
                  transform=None):
         assert split in ["train", "val", "test"]
         # root folder, split 
-        self.root_folder = os.path.join(root, "64x64_15cm_24px-exc_v5-marg-32_expanded")
+        self.root_folder = os.path.join(root, "64x64_15cm_24px-exc_v5-marg-32_expanded/")
         self.split = split 
         self.transform = transform 
         self.n_classes = num_classes 
@@ -35,7 +35,7 @@ class Cowc(data.Dataset):
         # store the file list 
         file_label_list = []
         for line in lines:
-            tmp = line.rstrip('\n').split(' ')
+            tmp = line.rstrip('\n').split('\t')
             filename = tmp[0]
             label_id = int(tmp[-1])
             file_label_list.append((filename, label_id))
@@ -44,13 +44,34 @@ class Cowc(data.Dataset):
         self.img_label_list = self._load_dataset(file_label_list)
 
     def _load_dataset(self, file_label_list):
-        # load dataset into memory
-        print("Loading {:s} set into memroy. This might take a while...".format(self.split))
-        img_label_list = tuple()
-        for filename, label_id in tqdm(file_label_list):
-            img = Image.open(filename).convert('RGB')
-            # Images are currently 64x64 
-            label = label_id
-            img_label_list += ((img, label), )
+        cached_filename = os.path.join(self.root_folder, "cached_{:s}.pkl".format(self.split))
+        if os.path.exists(cached_filename):
+            print("=> Loading from cached file {:s} ...".format(cached_filename))
+            try:
+                img_label_list = pickle.load(open(cached_filename, "rb"))
+            except (RuntimeError, TypeError, NameError):
+                print("Can't load cached file. Please remove the file and rebuild the cache!")
+        else:
+            # load dataset into memory
+            print("Loading {:s} set into memory. This might take a while...".format(self.split))
+            img_label_list = tuple()
+            for filename, label_id in tqdm(file_label_list):
+                img = Image.open(filename).convert('RGB')
+                # Images are currently 64x64 
+                label = label_id
+                img_label_list += ((img, label), )
+            pickle.dump(img_label_list, open(cached_filename, "wb"))
         return img_label_list
 
+    # These methods are called by pytorch when training
+    def __len__(self):
+        return len(self.img_label_list)
+
+    def __getitem__(self, index):
+        # load img and label 
+        img, label = self.img_label_list[index]
+        
+        # apply data augmentation
+        if self.transform is not None:
+            img = self.transform(img)
+        return img, label 
