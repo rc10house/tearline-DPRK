@@ -13,45 +13,49 @@ import torchvision.transforms as transforms
 
 
 class LeNet(nn.Module):
-    def __init__(self, input_shape=(64, 64), num_classes=4):
+    def __init__(self, input_shape=(32, 32), num_classes=4):
         super(LeNet, self).__init__()
         # layer 1
         self.l1 = nn.Sequential(
-            nn.Conv2d(3, 6, 5, stride=1),
+            nn.Conv2d(1, 6, kernel_size=5, stride=1),
+            nn.BatchNorm2d(6),
             nn.ReLU(),
-            nn.MaxPool2d(2, stride=2))
+            nn.MaxPool2d(kernel_size=2, stride=2))
         # layer 2 
         self.l2 = nn.Sequential(
-            nn.Conv2d(6, 16, 5, stride=1),
+            nn.Conv2d(6, 16, kernel_size=5, stride=1),
+            nn.BatchNorm2d(16),
             nn.ReLU(),
-            nn.MaxPool2d(2, stride=2))
+            nn.MaxPool2d(kernel_size=2, stride=2))
         # Layer 3 
-        self.l3 = nn.Flatten()
+        # self.l3 = nn.Flatten()
         # Layer 4 
         self.l4 = nn.Sequential(
-            nn.Linear(2704, 256),
+            nn.Linear(400, 120),
             nn.ReLU())
         # Layer 5 
         self.l5 = nn.Sequential(
-            nn.Linear(256, 128),
+            nn.Linear(120, 84),
             nn.ReLU())
         # Layer 6 
-        self.l6 = nn.Linear(128, 4)
+        self.l6 = nn.Linear(84, 4)
         
     def forward(self, x):
         shape_dict = {}
         out = self.l1(x)
-        shape_dict[1] = out.size()
+        shape_dict[0] = out.size()
         out = self.l2(out)
-        shape_dict[2] = out.size()
-        out = self.l3(out)
+        shape_dict[1] = out.size()
+        # testing, may need to delete:
+        out = out.reshape(out.size(0), -1)
+        # out = self.l3(out)
         shape_dict[3] = out.size()
         out = self.l4(out)
-        shape_dict[4] = out.size()
+        shape_dict[2] = out.size()
         out = self.l5(out)
-        shape_dict[5] = out.size()
+        shape_dict[3] = out.size()
         out = self.l6(out)
-        shape_dict[6] = out.size()
+        shape_dict[4] = out.size()
         return out, shape_dict
 
 
@@ -109,7 +113,11 @@ def test_model(model, test_loader, epoch):
     with torch.no_grad():
         for input, target in test_loader:
             output, _ = model(input)
-            pred = output.max(1, keepdim=True)[1]
+            # pred = output.max(1, keepdim=True)[1]
+            _, pred = torch.max(output.data, 1)
+            # print("pred: " + str(pred) + " target: " + str(target))
+            # print(pred.eq(target.view_as(pred)).sum().item())
+            # pred.eq
             correct += pred.eq(target.view_as(pred)).sum().item()
 
     test_acc = correct / len(test_loader.dataset)

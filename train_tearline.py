@@ -32,18 +32,23 @@ def main(args):
     training_criterion = nn.CrossEntropyLoss()
     optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=0.9)
 
+
     # set up transforms to transform the PIL Image to tensors
     train_transforms = transforms.Compose([
         transforms.ToTensor(),
         transforms.RandomHorizontalFlip(),
-        transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                             std=[0.229, 0.224, 0.225])
+        # transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                             # std=[0.229, 0.224, 0.225])
+        transforms.Normalize(mean=0.456,
+                             std=0.224)
     ])
 
     test_transform = transforms.Compose([
         transforms.ToTensor(),
-        transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                             std=[0.229, 0.224, 0.225])
+        # transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                             # std=[0.229, 0.224, 0.225])
+        transforms.Normalize(mean=0.456,
+                             std=0.224)
     ])
 
     ################################
@@ -53,7 +58,7 @@ def main(args):
     test_set = Cowc(root="./", split="test", transform=test_transform)
 
     train_loader = torch.utils.data.DataLoader(
-        train_set, batch_size=args.batch_size, shuffle=False)
+        train_set, batch_size=args.batch_size, shuffle=True)
     test_loader = torch.utils.data.DataLoader(
         test_set, batch_size=args.batch_size, shuffle=False)
 
