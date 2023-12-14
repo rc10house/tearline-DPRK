@@ -8,7 +8,7 @@ import torchvision.transforms as transforms
 from tearline_data_loader import Cowc
 from lenet import LeNet, test_model
 from tqdm import tqdm
-from PIL import Image
+from PIL import Image, ImageDraw
 
 
 class Target():
@@ -47,6 +47,26 @@ class Target():
         return img, label
 
 
+def stitch(results, path):
+
+    root = os.path.join("./", path)
+    files = os.listdir(root)  
+
+    output = os.path.join("./", "results")
+
+    for i, f in enumerate(files):
+        img_path = os.path.join(root, f)
+        img = Image.open(img_path).convert("L")
+        
+        new_img = Image.new("L", img.size, color=255)
+        
+        draw = ImageDraw.Draw(new_img)
+        if (results[i] == 3):  
+            draw.rectangle([(0, 0), (64, 64)], fill=None, outline='red', width=1)
+            new_img.save(os.path.join(output, f.replace(".png", "_processed_red.png")))
+        else:
+            new_img.save(os.path.join(output, f.replace(".png", "_processed.png")))
+
 def main(args):
     # set up random seed 
     torch.manual_seed(0)
@@ -80,16 +100,20 @@ def main(args):
     start = time.time()
     model.eval()
     cars = 0 
+
+    results = torch.emtpy(0)
+
     with torch.no_grad():
         for input, _ in data_loader:
             output, _ = model(input)
+            torch.cat((results, output))
             pred = output.max(1, keepdim=True)[1] 
             classes = ["not car", "other", "pickup", "sedan"]
             for p in pred:
                 if classes[p] == "sedan": cars += 1
         print("cars: " + str(cars))
 
-
+    stitch(results, args.path)
 
     end = time.time() 
     print("Model took {:0.2f} sec".format(end-start))
