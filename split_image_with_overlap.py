@@ -33,5 +33,5 @@ frmt = 'jpeg'
 for i in Y_points:
     for j in X_points:
         split = img[i:i+split_height, j:j+split_width]
-        cv2.imwrite('{}_{}.{}'.format(name, count, frmt), split)
+        cv2.imwrite('{}_{}.{}'.format(str(count).zfill(5), name, frmt), split)
         count += 1
