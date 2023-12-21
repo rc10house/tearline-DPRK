@@ -23,8 +23,8 @@ def start_points(size, split_size, overlap=0):
     return points
 
 
-X_points = start_points(img_w, split_width, 0.5)
-Y_points = start_points(img_h, split_height, 0.5)
+X_points = start_points(img_w, split_width, 0)
+Y_points = start_points(img_h, split_height, 0)
 
 count = 0
 name = 'splitted'

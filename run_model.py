@@ -58,14 +58,17 @@ def stitch(results, path):
         img_path = os.path.join(root, f)
         img = Image.open(img_path).convert("L")
         
-        new_img = Image.new("L", img.size, color=255)
+        new_img = Image.new("RGB", img.size, color=255)
+        new_img.paste(im=img, box=(0,0))
         
         draw = ImageDraw.Draw(new_img)
-        if (results[i] == 3):  
-            draw.rectangle([(0, 0), (64, 64)], fill=None, outline='red', width=1)
-            new_img.save(os.path.join(output, f.replace(".png", "_processed_red.png")))
+        if (results[i] == 3.):  
+            # draw red cross over image
+            draw.line((0,0) + img.size, fill="red")
+            draw.line((0, img.size[1], img.size[0], 0), fill="red")
+            new_img.save(os.path.join(output, f.replace(".jpeg", "_processed_red.jpeg")))
         else:
-            new_img.save(os.path.join(output, f.replace(".png", "_processed.png")))
+            new_img.save(os.path.join(output, f.replace(".jpeg", "_processed.jpeg")))
 
 def main(args):
     # set up random seed 
@@ -101,15 +104,16 @@ def main(args):
     model.eval()
     cars = 0 
 
-    results = torch.emtpy(0)
+    results = torch.empty(1)
 
     with torch.no_grad():
         for input, _ in data_loader:
             output, _ = model(input)
-            torch.cat((results, output))
             pred = output.max(1, keepdim=True)[1] 
+            # print(pred)
             classes = ["not car", "other", "pickup", "sedan"]
             for p in pred:
+                results = torch.cat((results, p))
                 if classes[p] == "sedan": cars += 1
         print("cars: " + str(cars))
 
