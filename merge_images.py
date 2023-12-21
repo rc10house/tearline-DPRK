@@ -8,6 +8,8 @@ small_img_height = 64
 
 if __name__=="__main__":
     files = os.listdir("./results/")
+    # sort is essential to make sure files stay in correct order
+    files.sort()
 
     horizontal_imgs = []
     img = Image.open("./results/" + files[0])
