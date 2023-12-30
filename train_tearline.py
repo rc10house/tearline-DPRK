@@ -5,7 +5,7 @@ import torch.nn as nn
 import torch.optim as optim 
 import torchvision.transforms as transforms
 from tearline_data_loader import Cowc
-from lenet import LeNet, train_model, test_model
+from retinanet import RetinaNet, train_model, test_model 
 
 def save_checkpoint(state, is_best, file_folder="./outputs/",
                     filename="checkpoint.pth.tar"):
@@ -27,10 +27,14 @@ def main(args):
     ###################################
     # setup model, loss and optimizer #
     ###################################
-    model = LeNet()
+    model = RetinaNet()
 
-    training_criterion = nn.CrossEntropyLoss()
-    optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=0.9)
+    # training_criterion = nn.CrossEntropyLoss()
+    params = [p for p in model.parameters() if p.requires_grad]
+    optimizer = optim.SGD(params, lr=args.lr, momentum=0.9, nesterov=True)
+    scheduler = optim.lr_scheduler.StepLR(
+        optimizer=optimizer, step_size=50, gamma=0.1, verbose=True
+    )
 
 
     # set up transforms to transform the PIL Image to tensors
@@ -88,7 +92,7 @@ def main(args):
     print("Training the model...\n")
     for epoch in range(start_epoch, args.epochs):
             # train model for 1 epoch 
-        train_model(model, train_loader, optimizer, training_criterion, epoch)
+        train_model(model, train_loader, optimizer, epoch)
         # evaluate the model on test_set after this epoch
         acc = test_model(model, test_loader, epoch)
         # save the current checkpoint 

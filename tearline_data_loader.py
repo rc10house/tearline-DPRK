@@ -56,9 +56,8 @@ class Cowc(data.Dataset):
             print("Loading {:s} set into memory. This might take a while...".format(self.split))
             img_label_list = tuple()
             for filename, label_id in tqdm(file_label_list):
-                # img = Image.open(filename).convert('RGB')
-                # trying greyscale
-                img = Image.open(filename).convert("L")
+                # using RGB instead of greyscale now
+                img = Image.open(filename)
                 # trying 32x32
                 img = img.resize((32, 32), Image.BILINEAR)
                 label = label_id
