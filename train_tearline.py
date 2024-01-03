@@ -1,11 +1,12 @@
 import os
 import argparse 
 import torch 
-import torch.nn as nn 
 import torch.optim as optim 
 import torchvision.transforms as transforms
-from tearline_data_loader import Cowc
+from tearline_data_loader import create_dataset, create_loader
 from retinanet import RetinaNet, train_model, test_model 
+import albumentations as A
+from albumentations.pytorch import ToTensorV2
 
 def save_checkpoint(state, is_best, file_folder="./outputs/",
                     filename="checkpoint.pth.tar"):
@@ -38,33 +39,33 @@ def main(args):
 
 
     # set up transforms to transform the PIL Image to tensors
-    train_transforms = transforms.Compose([
-        transforms.ToTensor(),
-        transforms.RandomHorizontalFlip(),
-        # transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                             # std=[0.229, 0.224, 0.225])
-        transforms.Normalize(mean=0.456,
-                             std=0.224)
-    ])
+    train_transforms = A.Compose([
+        A.HorizontalFlip(p=0.3),
+        A.Rotate(limit=30, p=0.3),
+        A.RandomBrightnessContrast(p=0.3),
+        A.RandomGamma(p=0.3),
+        A.RandomFog(fog_coef_lower=0.1, fog_coef_upper=0.3, p=0.3),
+        ToTensorV2(p=1.0),
+    ], bbox_params={
+        "format": "pascal_voc",
+        "label_fields": ["labels"]
+    })
 
-    test_transform = transforms.Compose([
-        transforms.ToTensor(),
-        # transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                             # std=[0.229, 0.224, 0.225])
-        transforms.Normalize(mean=0.456,
-                             std=0.224)
-    ])
+    test_transforms = A.Compose([
+        ToTensorV2(p=1.0),
+    ], bbox_params={
+        "format": "pascal_voc",
+        "label_fields": ["labels"]
+    })
 
     ################################
     # setup dataset and dataloader #
     ################################
-    train_set = Cowc(root="./", split="train", transform=train_transforms)
-    test_set = Cowc(root="./", split="test", transform=test_transform)
+    train_set = create_dataset(root="./", split="train", image_width=64, image_height=64, transform=train_transforms)
+    test_set = create_dataset(root="./", split="test", image_width=64, image_height=64, transform=test_transforms)
 
-    train_loader = torch.utils.data.DataLoader(
-        train_set, batch_size=args.batch_size, shuffle=True)
-    test_loader = torch.utils.data.DataLoader(
-        test_set, batch_size=args.batch_size, shuffle=False)
+    train_loader = create_loader(train_set, batch_size=args.batch_size, split="train")
+    test_loader = create_loader(test_set, batch_size=args.batch_size, split="test")
 
     ##################
     # start training #

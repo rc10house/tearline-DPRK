@@ -1,4 +1,0 @@
-- put red box/dot on cars that are recognized
-- figure out how to get resolution of downscaled images the same 
-- use rgb instead of greyscale
-- swap out lenet for something better

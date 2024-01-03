@@ -40,28 +40,27 @@ def train_model(model, train_loader, optimizer, epoch):
     """
     model.train()
     train_loss = 0.0
-    for input, target in tqdm(train_loader, total=len(train_loader)):
+    prog_bar = tqdm(train_loader, total=len(train_loader))
+    for i, data in enumerate(prog_bar):
         ###################################
         # fill in the standard training loop of forward pass,
         # backward pass, loss computation and optimizer step
         ###################################
+        images, targets = data
 
         optimizer.zero_grad()
-        # output, _ = model(input)
-        # loss = criterion(output, target)
 
-        loss_dict = model(input, target)
+        loss_dict = model(images, targets)
         losses = sum(loss for loss in loss_dict.values())
-        # 'reduce losses over all GPUs for logging purposes'
 
-        # loss = model.compute_loss(target, outputs, )
         losses.backward()
         optimizer.step()
 
         # Update the train_loss variable
         # .item() detaches the node from the computational graph
         # Uncomment the below line after you fill block 1 and 2
-        train_loss += loss.item()
+        # train_loss += losses.item()
+        train_loss += losses
 
     train_loss /= len(train_loader)
     print('[Training set] Epoch: {:d}, Average loss: {:.4f}'.format(epoch+1, train_loss))
