@@ -1,0 +1,11 @@
+path: datasets/cowc
+train: test/
+val: test/
+test: # optional
+
+names:
+  0: not_car
+  1: other
+  2: pickup
+  3: sedan
+  4: unknown
