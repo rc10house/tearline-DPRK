@@ -20,11 +20,11 @@ def convert_to_yolo_format(annotation_path, output_dir, image_dir):
             # Convert bounding box coordinates to YOLO format
             # In this example, assume there is only one object in the image
             # If multiple objects are present, iterate over them and write their coordinates
-            # Here, I'm assuming the entire image as the bounding box (you can adjust this)
-            x_center = 0.4
-            y_center = 0.4
-            box_width = 0.8
-            box_height = 0.8
+            # This is going the be using the whole image as the bounding box.
+            x_center = 0.5
+            y_center = 0.5
+            box_width = 0.75
+            box_height = 0.75
             out_file.write(f"{x_center} {y_center} {box_width} {box_height}\n")
 
 annotation_path = '64x64_15cm_24px-exc_v5-marg-32_expanded\toronto_train_label.txt'
