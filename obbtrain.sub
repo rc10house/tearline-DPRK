@@ -1,0 +1,22 @@
+# Training YoloV8
+
+universe = vanilla
+
+executable = obbrun.sh
+transfer_input_files = yolov8.tar.gz,dota_dataset.tar.gz,obbtrain.py
+
+should_transfer_files = YES
+when_to_transfer_output = ON_EXIT
+
+log = yolov8.log
+error = yolov8.err
+output = yolov8.out
+
+request_cpus = 8
+request_memory = 128GB
+request_disk = 75GB
+request_gpus = 2
++WantGPULab = true
++GPUJobLength = "long"
+
+queue
