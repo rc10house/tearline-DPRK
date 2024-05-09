@@ -2,8 +2,8 @@ import cv2
 path_to_img = "./AI_test_sector_1.jpg"
 img = cv2.imread(path_to_img)
 img_h, img_w, _ = img.shape
-split_width = 64
-split_height = 64
+split_width = 2048
+split_height = 2048
 
 
 def start_points(size, split_size, overlap=0):
